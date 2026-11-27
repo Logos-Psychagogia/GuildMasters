@@ -56,5 +56,12 @@ window.gmnet = (() => {
     },
     send(s) { if (conn) conn.send(s); },
     get room() { return room; },
+    // Invite links: <page>?room=CODE pre-fills the code on the friend's screen.
+    invite(code) { return location.origin + location.pathname + "?room=" + code + (LOCAL ? "&local" : ""); },
+    get urlRoom() { return (new URLSearchParams(location.search).get("room") || "").toUpperCase(); },
+    copy(text) {
+      if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).catch(() => prompt("Copy this:", text)); return; }
+      prompt("Copy this:", text);
+    },
   };
 })();
