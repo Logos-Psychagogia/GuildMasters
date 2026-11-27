@@ -1214,6 +1214,7 @@ func _online_setup_row() -> void:
 	row.add_child(sl)
 	var code := LineEdit.new()
 	code.placeholder_text = "Room code"
+	code.text = Online.url_room()
 	code.custom_minimum_size = Vector2(140, 0)
 	row.add_child(code)
 	row.add_child(_btn("Join", func(): _go_online(nm.text, code.text), false, "quest"))
@@ -1229,13 +1230,13 @@ func _go_online(nm: String, code: String) -> void:
 	_clear(bar)
 	if code == "":
 		me = 0
-		net.host()
 		bar.add_child(_rich("Opening a room…", 0, 17))
+		net.host()
 	else:
 		me = 1
 		room_code = code
-		net.join(code)
 		bar.add_child(_rich("Joining room [b]%s[/b]…" % _esc(code), 0, 17))
+		net.join(code)
 
 func _on_net_status(s: String) -> void:
 	if net == null:
@@ -1244,9 +1245,21 @@ func _on_net_status(s: String) -> void:
 		room_code = s.substr(5)
 		if g == null:
 			_clear(bar)
+			var link := Online.invite_link(room_code)
 			bar.add_child(_header("Room code:  %s" % room_code))
-			bar.add_child(_rich("Send this code to your friend. They open the same link, type their name and the code, and press [b]Join[/b]. The game starts as soon as they join.", 0, 17))
-			bar.add_child(_btn("Cancel", _show_setup))
+			bar.add_child(_rich("Send your friend this invite link: [b]%s[/b]\nThey open it, type their name and press [b]Join[/b] (the code is already filled in). The game starts as soon as they join." % _esc(link), 0, 17))
+			var row := HBoxContainer.new()
+			bar.add_child(row)
+			var done := Label.new()
+			done.add_theme_color_override("font_color", Color("7fe0a0"))
+			row.add_child(_btn("Copy invite link", func():
+				Online.copy(link)
+				done.text = "  Invite link copied: paste it to your friend."))
+			row.add_child(_btn("Copy code only", func():
+				Online.copy(room_code)
+				done.text = "  Code copied."))
+			row.add_child(_btn("Cancel", _show_setup))
+			row.add_child(done)
 	elif s == "connected":
 		if not net.is_host:
 			net.send({"t": "hello", "name": my_name})

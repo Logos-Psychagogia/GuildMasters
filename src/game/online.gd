@@ -42,6 +42,22 @@ func _on_msg(s: String) -> void:
 	if v is Dictionary:
 		message.emit(v)
 
+static func _gm():
+	return JavaScriptBridge.get_interface("gmnet") if OS.has_feature("web") else null
+
+## Room code from an invite link (<page>?room=CODE), or "".
+static func url_room() -> String:
+	return str(_gm().urlRoom) if _gm() else ""
+
+static func invite_link(code: String) -> String:
+	return str(_gm().invite(code)) if _gm() else code
+
+static func copy(text: String) -> void:
+	if _gm():
+		_gm().copy(text)
+	else:
+		DisplayServer.clipboard_set(text)
+
 static func snapshot(g: Game, log_from: int) -> Dictionary:
 	var s := {"t": "state", "log_from": log_from, "log": g.log_lines.slice(log_from)}
 	for k in SYNC:
