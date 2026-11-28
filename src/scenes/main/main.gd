@@ -21,6 +21,10 @@ var g: Game
 var top: RichTextLabel
 var market: VBoxContainer
 var guild_box: VBoxContainer
+var guild_row: HBoxContainer
+var view_pi := -1        # whose team (mercenaries, locations) the board shows
+var strip_scroll := {}   # sideways scroll of each card strip, kept across refreshes
+const TEAM_W := 236
 var fame_box: HBoxContainer
 var log_box: RichTextLabel
 var bar: VBoxContainer
@@ -94,7 +98,14 @@ func _ready() -> void:
 	mid.add_theme_constant_override("separation", 10)
 	root.add_child(mid)
 	market = _scroll_column(mid, 548)
-	guild_box = _scroll_column(mid, 0)
+	var gcol := VBoxContainer.new()   # both guilds pinned on top, the shown team scrolls below
+	gcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gcol.add_theme_constant_override("separation", 6)
+	mid.add_child(gcol)
+	guild_row = HBoxContainer.new()
+	guild_row.add_theme_constant_override("separation", 8)
+	gcol.add_child(guild_row)
+	guild_box = _scroll_column(gcol, 0)
 	log_box = RichTextLabel.new()
 	log_box.bbcode_enabled = true
 	log_box.scroll_following = true
@@ -142,6 +153,7 @@ func _ready() -> void:
 func _scroll_column(parent: Control, width: int) -> VBoxContainer:
 	var s := ScrollContainer.new()
 	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	s.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if width > 0:
 		s.custom_minimum_size = Vector2(width, 0)
 	else:
@@ -437,7 +449,9 @@ func _card(meta: Dictionary, title: String, badge: String, body: String, col: Co
 	var body_rtl := _rich(body, 0, 15)
 	v.add_child(body_rtl)
 	var interactive := _interactive(meta)
-	var own_info: bool = meta.get("k", "") == "guild" and meta.get("pi", -1) == mode_pi and targeting.is_empty()
+	var own_info: bool = meta.get("k", "") == "guild" and targeting.is_empty()
+	# the rival's team, opened from its guild panel, is for reading: don't dim it
+	own_info = own_info or (meta.get("k", "") in ["merc", "loc"] and meta.pi != mode_pi and mode_pi >= 0)
 	if (mode != "" or not targeting.is_empty()) and not interactive and not own_info:
 		pc.modulate = DIM
 	if interactive:
@@ -537,6 +551,7 @@ func _show_setup() -> void:
 
 func _new_game(names: Array, bots: Array, seed_val: int) -> void:
 	g = Game.new()
+	view_pi = -1
 	g.changed.connect(_mark_dirty)
 	g.logged.connect(_on_log)
 	g.need_choice.connect(_on_need)
@@ -588,13 +603,16 @@ func _refresh() -> void:
 	_clear(market)
 	_clear(guild_box)
 	_render_market()
+	if view_pi < 0 or view_pi >= g.n:
+		view_pi = max(me, 0)
+	_clear(guild_row)
 	var order_list := range(g.n)
-	var first := me if me >= 0 else (mode_pi if mode != "" else -1)
-	if first >= 0:
-		order_list.erase(first)
-		order_list.push_front(first)
+	if me >= 0:   # online: my guild always on the left
+		order_list.erase(me)
+		order_list.push_front(me)
 	for pi in order_list:
-		_render_guild(pi)
+		guild_row.add_child(_render_guild(pi))
+	_render_team(view_pi)
 	if mode != "":
 		_render_mode_bar()
 
@@ -658,11 +676,11 @@ func _render_market() -> void:
 	market.add_child(_header("Item deck (%d left)" % g.item_deck.size()))
 	market.add_child(_rich(fmt(", ".join(g.item_deck.map(func(it): return Cards.ITEMS[it].name))), 0, 14))
 
-func _render_guild(pi: int) -> void:
+## A guild panel (both are always shown side by side). Clicking one shows that guild's team below.
+func _render_guild(pi: int) -> PanelContainer:
 	var p: Dictionary = g.players[pi]
 	var gd: Dictionary = Cards.GUILDS[p.guild]
-	var t := "%s  ·  %s%s\n" % [_pname(pi), gd.name, "  ·  [color=#ffd23f]★ priority[/color]" if g.priority == pi else ""]
-	t += "%s\n" % res_table(pi)
+	var t := "%s\n" % res_table(pi)
 	t += fmt("Night: +%d gold base income. %s" % [gd.income + (3 if g.has_keep(pi, "kraken") else 0), gd.text])
 	var b := []
 	for k in p.buildings:
@@ -681,29 +699,62 @@ func _render_guild(pi: int) -> void:
 		t += "\n[b]Tokens:[/b] free upgrades %d, free stone walls %d" % [p.tokens.upgrade, p.tokens.wall]
 	if p.legends > 0:
 		t += "\nLegendary quests completed: %d" % p.legends
-	guild_box.add_child(_card({"k": "guild", "pi": pi}, "", "", t, C_GUILD, 0, "guilds/" + p.guild))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
-	guild_box.add_child(row)
-	var mc := VBoxContainer.new()
-	mc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mc.add_child(_header("Mercenaries"))
-	var f := _flow()
+	var shown := pi == view_pi
+	var title := "%s  [font_size=15][color=#aab]%s[/color]%s[/font_size]" % [_pname(pi), gd.name, "  [color=#ffd23f]★ priority[/color]" if g.priority == pi else ""]
+	var pc := _card({"k": "guild", "pi": pi}, title, "", t, C_GUILD, 0, "guilds/" + p.guild)
+	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sb: StyleBoxFlat = pc.get_theme_stylebox("panel")
+	if shown:
+		sb.border_color = Color("e8d9a8")
+		sb.set_border_width_all(3)
+		sb.bg_color = C_GUILD.darkened(0.5)
+	if not shown:
+		pc.tooltip_text = (pc.tooltip_text + "\n" if pc.tooltip_text != "" else "") + "Click: show this guild's mercenaries and locations"
+		pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	pc.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and view_pi != pi:
+			view_pi = pi
+			_mark_dirty())
+	return pc
+
+## The shown guild's team: mercenaries in two rows and locations in one row, each scrolling sideways.
+func _render_team(pi: int) -> void:
+	var p: Dictionary = g.players[pi]
+	guild_box.add_child(_rich("[b]%s's team[/b]   [color=#aab][font_size=14]Click a guild above to see its team.[/font_size][/color]" % _pname(pi), 0, 18))
+	var cards := []
 	for m in p.mercs:
-		f.add_child(_card({"k": "merc", "pi": pi, "uid": m.uid}, g.mname(m), "Lv " + roman(g.level(m)), _merc_body(pi, m), C_MERC, 252, "mercs/" + m.id))
-	if p.mercs.is_empty():
-		f.add_child(_rich("[i]none[/i]"))
-	mc.add_child(f)
-	row.add_child(mc)
-	var lc := VBoxContainer.new()
-	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lc.add_child(_header("Locations"))
-	f = _flow()
+		cards.append(_card({"k": "merc", "pi": pi, "uid": m.uid}, g.mname(m), "Lv " + roman(g.level(m)), _merc_body(pi, m), C_MERC, TEAM_W, "mercs/" + m.id))
+	guild_box.add_child(_header("Mercenaries (%d)%s" % [p.mercs.size(), "   ·   scroll sideways for more  →" if p.mercs.size() > 6 else ""]))
+	guild_box.add_child(_strip(cards, 2, "m%d" % pi) if not cards.is_empty() else _rich("[i]none[/i]"))
+	cards = []
 	for l in p.locs:
-		f.add_child(_card({"k": "loc", "pi": pi, "lid": l.id}, g.lname(l.id), "Lv " + roman(l.level), _loc_body(l.id, pi), C_LOC, 252, "locs/" + l.id))
-	lc.add_child(f)
-	row.add_child(lc)
-	guild_box.add_child(HSeparator.new())
+		cards.append(_card({"k": "loc", "pi": pi, "lid": l.id}, g.lname(l.id), "Lv " + roman(l.level), _loc_body(l.id, pi), C_LOC, TEAM_W, "locs/" + l.id))
+	guild_box.add_child(_header("Locations (%d)%s" % [p.locs.size(), "   ·   scroll sideways for more  →" if p.locs.size() > 3 else ""]))
+	guild_box.add_child(_strip(cards, 1, "l%d" % pi) if not cards.is_empty() else _rich("[i]none[/i]"))
+
+## Cards in a fixed number of rows (rows line up), scrolling sideways; keeps its scroll across refreshes.
+## The mouse wheel still scrolls the board up and down; Shift+wheel or the scrollbar scrolls sideways.
+func _strip(cards: Array, rows: int, key: String) -> ScrollContainer:
+	var sc := ScrollContainer.new()
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var grid := GridContainer.new()
+	grid.columns = ceili(cards.size() / float(rows))
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	sc.add_child(grid)
+	for c in cards:
+		grid.add_child(c)
+	var keep: int = strip_scroll.get(key, 0)
+	sc.get_h_scroll_bar().value_changed.connect(func(v): strip_scroll[key] = int(v))
+	sc.ready.connect(func(): sc.set_deferred("scroll_horizontal", keep))
+	sc.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN] and not ev.shift_pressed:
+			if ev.pressed:
+				var vs: VScrollBar = guild_box.get_parent().get_v_scroll_bar()
+				vs.value += vs.page / 8.0 * ev.factor * (1 if ev.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1)
+			sc.accept_event())
+	return sc
 
 func _rounds(tm: Array) -> String:
 	if tm.is_empty():
@@ -1075,6 +1126,8 @@ func _on_need(r: Dictionary) -> void:
 func _begin(r: Dictionary) -> void:
 	req = r
 	mode_pi = r.player
+	if r.kind in ["morning", "build"]:
+		view_pi = r.player   # your own team, where your orders and builds happen
 	draft_bids = {}
 	draft_orders = {}
 	match r.kind:

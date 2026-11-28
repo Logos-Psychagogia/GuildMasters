@@ -19,7 +19,8 @@ design PDFs (rulebook, cards, player aid, tokens) live one folder up.
   `mode`: cards become clickable (`_interactive()` decides, everything else is
   dimmed), clicks open popups (`_action_menu`, `_bid_popup`), and Work/Quest/
   Attack orders go through `targeting`. Other requests (`pick`, `amounts`) use the
-  bottom bar. `fmt()` turns rules text into bbcode with icons from
+  bottom bar. Both guild panels sit in `guild_row` (pinned); `guild_box` scrolls the team of `view_pi`
+  (`_render_team`, card strips via `_strip`). `fmt()` turns rules text into bbcode with icons from
   `assets/icons/`. Secret requests get a pass-the-device cover.
 - `assets/cards/<mercs|locs|items|quests|guilds>/<card id>.svg`: one picture per card, shown in the
   card header via `_card(..., art)` / `card_art()` in main.gd. A new card id without an SVG just shows no picture.
