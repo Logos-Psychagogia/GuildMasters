@@ -441,7 +441,7 @@ func _card(meta: Dictionary, title: String, badge: String, body: String, col: Co
 	if (mode != "" or not targeting.is_empty()) and not interactive and not own_info:
 		pc.modulate = DIM
 	if interactive:
-		if not targeting.is_empty():
+		if not targeting.is_empty() or (mode == "morning" and meta.get("k", "") == "rowloc" and _conquerable(meta.lid)):
 			sb.border_color = Color("ffd23f")
 			sb.set_border_width_all(3)
 		pc.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -648,7 +648,7 @@ func _render_market() -> void:
 	market.add_child(_header("Locations for sale  (deck %d · discard %d)" % [g.loc_deck.size(), g.loc_discard.size()]))
 	f = _flow()
 	for l in g.loc_row:
-		f.add_child(_card({"k": "rowloc", "lid": l}, g.lname(l), "%s %d" % [ii("gold", 20), g.bid_min("L" + l, mode_pi if mode == "morning" else -1)], _loc_body(l, -1), C_LOC, 252, "locs/" + l))
+		f.add_child(_card({"k": "rowloc", "lid": l}, g.lname(l), "%s %d" % [ii("gold", 20), g.bid_min("L" + l, mode_pi if mode == "morning" else -1)], _loc_body(l, -1) + ("\n[color=#ffd23f]%s [b]You can conquer this[/b][/color]" % ii("attack") if mode == "morning" and _conquerable(l) else ""), C_LOC, 252, "locs/" + l))
 	market.add_child(f)
 	market.add_child(_header("Mercenaries for hire  (deck %d)" % g.merc_deck.size()))
 	f = _flow()
@@ -810,7 +810,7 @@ func _interactive(meta: Dictionary) -> bool:
 			"quest":
 				return k in ["quest", "legend"] and _quest_lit(meta.q)
 			"attack":
-				return (k == "guild" and meta.pi != mode_pi) or k == "rowloc"
+				return (k == "guild" and meta.pi != mode_pi) or (k == "rowloc" and _conquerable(meta.lid))
 		return false
 	var p: Dictionary = g.players[mode_pi] if mode_pi >= 0 else {}
 	match mode:
@@ -819,6 +819,8 @@ func _interactive(meta: Dictionary) -> bool:
 				return meta.pi == mode_pi
 			if k in ["quest", "legend"]:
 				return _quest_lit(meta.q)
+			if k == "rowloc" and _conquerable(meta.lid):
+				return true
 			if k in ["rowmerc", "rowloc"]:
 				var key: String = ("M%d" % meta.uid) if k == "rowmerc" else "L" + meta.lid
 				return draft_bids.has(key) or p.gold - _bids_total() >= g.bid_min(key, mode_pi)
@@ -839,6 +841,18 @@ func _interactive(meta: Dictionary) -> bool:
 ## A quest lights up when some team of the current player's mercenaries could complete it.
 func _quest_lit(q: String) -> bool:
 	return mode_pi >= 0 and not g.quest_feasible(mode_pi, q, g.players[mode_pi].mercs.filter(func(m): return not m.hired_today)).is_empty()
+
+## A location for sale lights up when the current player's mercenaries together could conquer it.
+func _conquerable(lid: String) -> bool:
+	if mode_pi < 0 or not lid in g.loc_row:
+		return false
+	var grp: Array = g.players[mode_pi].mercs.filter(func(m): return not m.hired_today)
+	if grp.is_empty():
+		return false
+	var wm := 0
+	for m in grp:
+		wm += g.block_sum(mode_pi, m, "attack", "wall", {"group": grp})
+	return g.attack_power(mode_pi, grp) > g.loc_defense(lid, wm, wm >= 99)
 
 func _start_team(q: String, extra := -1) -> void:
 	var sel := []
@@ -961,6 +975,8 @@ func _bid_popup(key: String) -> void:
 	var info := _rich("%s [b]Bid on %s[/b]\nMinimum %d %s. You have %d %s%s." % [ii("bid"), g.bid_name(key), mn, ii("gold"), p.gold, ii("gold"),
 		"" if others == 0 else ", %d already bid elsewhere" % others], 360, 16)
 	v.add_child(info)
+	if key.begins_with("L") and _conquerable(key.substr(1)):
+		v.add_child(_rich("%s Or conquer it: click your mercenaries, choose Attack, then click this location." % ii("attack"), 360, 15))
 	var row := HBoxContainer.new()
 	v.add_child(row)
 	var spin := _spin(mn, avail, draft_bids.get(key, mn))

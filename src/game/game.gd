@@ -448,6 +448,18 @@ func take_item(pi: int, it: String) -> void:
 	else:
 		players[pi].stash.append(it)
 	note("%s takes %s." % [players[pi].name, Cards.ITEMS[it].name])
+	if Cards.ITEMS[it].kind == "relic" or players[pi].mercs.is_empty():
+		return
+	# Equipment can be equipped right away; a full mercenary swaps out its oldest item to the stash.
+	var ms: Array = players[pi].mercs
+	var i: int = await pick(pi, "Equip %s (%s) now?" % [Cards.ITEMS[it].name, Cards.ITEMS[it].text],
+		ms.map(func(m): return mname(m) + ("" if m.equip.size() < slots(m) else " (swaps out %s)" % Cards.ITEMS[m.equip[0]].name)), "Keep in stash")
+	if i >= 0:
+		var m: Dictionary = ms[i]
+		if m.equip.size() >= slots(m):
+			do_unequip(pi, m.uid, m.equip[0])
+		do_equip(pi, it, m.uid)
+		note("%s equips %s." % [mname(m), Cards.ITEMS[it].name])
 
 func hire(pi: int, m: Dictionary) -> void:
 	merc_row.erase(m)
@@ -1164,7 +1176,7 @@ func reward(c: Dictionary) -> void:
 	await share_xp(pi, c.mercs, r.get("xp", 0))
 	if r.has("item"):
 		if r.item in item_deck:
-			take_item(pi, r.item)
+			await take_item(pi, r.item)
 		else:
 			gain(pi, "gold", 2)
 			note("%s is gone; %s takes 2 gold instead." % [Cards.ITEMS[r.item].name, p.name])
@@ -1224,7 +1236,7 @@ func process_tiles() -> void:
 				var eq: Array = item_deck.filter(func(it): return Cards.ITEMS[it].kind == "equip")
 				var i: int = await pick(pi, "Royal Armory: take any equipment from the deck.", eq.map(func(it): return "%s (%s)" % [Cards.ITEMS[it].name, Cards.ITEMS[it].text]))
 				if i >= 0:
-					take_item(pi, eq[i])
+					await take_item(pi, eq[i])
 			"hero":
 				var i: int = await pick(pi, "Hero's Welcome: hire a mercenary from the row for free.", merc_row.map(func(m): return "%s (Lv %d)" % [mname(m), level(m)]))
 				if i >= 0:
@@ -1339,7 +1351,7 @@ func do_work(pi: int, m: Dictionary, lid: String) -> void:
 					its.map(func(it): return "%s (value %d): %s" % [Cards.ITEMS[it].name, Cards.ITEMS[it].value, Cards.ITEMS[it].text]), "Skip")
 				if i >= 0:
 					p[res] -= w.pay
-					take_item(pi, its[i])
+					await take_item(pi, its[i])
 		"sell":
 			var cap := per(s[2], w.div)
 			if cap > 0 and p.wood + p.stone + p.metal > 0:
@@ -1404,7 +1416,7 @@ func income(pi: int) -> void:
 			gain(pi, keep_prod[k], 1)
 	if has_relic(pi, "golden_idol"):
 		gain(pi, "gold", 2)
-	for m in p.mercs:
+	for m in garrison(pi):   # only defending mercenaries use their Night ability
 		fire(pi, m, "night")
 	if has_relic(pi, "trade_charter"):
 		var have: Array = ["wood", "stone", "metal"].filter(func(r): return p[r] > 0)
@@ -1488,7 +1500,7 @@ func projected_production(pi: int, include_orders: bool) -> Dictionary:
 			out[keep_prod[k]] += 1
 	if has_relic(pi, "golden_idol"):
 		out.gold += 2
-	for m in p.mercs:
+	for m in garrison(pi):
 		_add_res(out, gain_amounts(pi, m, "night"))
 	if not include_orders:
 		return out

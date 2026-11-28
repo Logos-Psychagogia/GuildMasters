@@ -123,6 +123,13 @@ func _rules_checks() -> int:
 	f += _check(team.map(func(x): return x.xp) == [6, 6, 6], "4 more XP evens them at 6, got %s" % [team.map(func(x): return x.xp)])
 	g3.share_xp(0, team, 2)    # 3 tied, 2 left: the player (bot) picks two
 	f += _check(team.map(func(x): return x.xp).reduce(func(a, b): return a + b) == 20 and team.map(func(x): return x.xp).max() == 7, "2 XP among 3 tied go to two of them, got %s" % [team.map(func(x): return x.xp)])
+	var gn := Game.new()
+	gn.setup(["A", "B"], [true, true], 5)
+	var iso := gn.new_merc("isolde", 0)   # Night: +2 gold, only when defending
+	gn.players[0].mercs.append(iso)
+	var base5: int = gn.projected_production(0, false).gold
+	iso.order = {"t": "defend"}
+	f += _check(gn.projected_production(0, false).gold == base5 + 2, "Isolde's Night gold needs Defend")
 	var g4 := Game.new()
 	g4.setup(["A", "B"], [true, true], 4)
 	var w4 := g4.new_merc("kael", 0)   # Might 1: Arena pays only its base 2 gold

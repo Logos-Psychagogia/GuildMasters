@@ -243,8 +243,8 @@ func _s4() -> void:
 		"Stats: [b]Might[/b], [b]Skill[/b] and [b]Intellect[/b]. Their sum is the mercenary's [b]Power[/b].",
 		"XP and level. A mercenary reaches level II at 3 XP and level III at 10 XP, with better stats and abilities (right-click a card to see every level).",
 		"Wage: 1 gold per level, paid every Night.",
-		"Abilities. The opening word says when it works: Night:, Activate:, When attacking:, Garrison:, When working: and so on."])
-	_p("XP comes from quests, from some locations and from abilities. Each mercenary can carry one piece of equipment (some carry two). Equipment adds stats or abilities; you move it between mercenaries during Build.")
+		"Abilities. The opening word says when it works: Night:, Activate:, When attacking:, Garrison:, When working: and so on. A mercenary's Night: ability works only if it defended that day."])
+	_p("XP comes from quests, from some locations and from abilities. Each mercenary can carry one piece of equipment (some carry two). Equipment adds stats or abilities; when you get a piece you may equip it right away (a full mercenary swaps out its old piece to your stash). During Build, click a mercenary to equip, unequip or move equipment.")
 	var ids := Cards.MERCS.keys().filter(func(k): return k != id).slice(0, 3)
 	_cards(ids.map(func(k): return _merc(k)))
 
@@ -300,7 +300,7 @@ func _s8() -> void:
 func _s9() -> void:
 	_rows([
 		["build", "Build", "Each player in turn: upgrade locations, build walls and buildings, move equipment. Buildings produce from the next Night."],
-		["work", "Production", "Working mercenaries produce, Activate abilities happen, then income: your guild's gold, buildings, Night: abilities, kept bonuses and fame tiles."],
+		["work", "Production", "Working mercenaries produce, Activate abilities happen, then income: your guild's gold, buildings, Night: abilities of defending mercenaries, kept bonuses and fame tiles."],
 		["gold", "Wages", "Pay 1 gold per level of each mercenary. If you can't pay everyone you choose who stays; the rest leave the game and you lose 1 fame per level of each."]])
 	_p("[b]Buildings[/b] (build as many as you like):")
 	var b := []
