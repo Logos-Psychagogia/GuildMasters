@@ -386,7 +386,7 @@ func qsummary(q: String) -> String:
 		if r.has(res):
 			parts.append("%d %s" % [r[res], res])
 	if r.has("xp"):
-		parts.append("%d XP each" % r.xp)
+		parts.append("%d XP shared" % r.xp)
 	if r.has("item"):
 		parts.append("Item: " + Cards.ITEMS[r.item].name)
 	if r.has("loc"):
@@ -1161,8 +1161,7 @@ func reward(c: Dictionary) -> void:
 	add_fame(pi, r.get("fame", 0))
 	for res in RES:
 		gain(pi, res, r.get(res, 0))
-	for m in c.mercs:
-		add_xp(pi, m, r.get("xp", 0))
+	await share_xp(pi, c.mercs, r.get("xp", 0))
 	if r.has("item"):
 		if r.item in item_deck:
 			take_item(pi, r.item)
@@ -1181,6 +1180,29 @@ func reward(c: Dictionary) -> void:
 		if m in p.mercs:
 			fire(pi, m, "qdone", c.mercs)
 	note("%s collects the reward for %s." % [p.name, qname(q)])
+
+## Quest XP is shared: an even split first, then the leftover goes 1 at a time to the team's lowest-XP
+## mercenaries to even them out. When fewer points are left than mercenaries tied at the lowest XP,
+## the player picks who gets them.
+func share_xp(pi: int, team: Array, total: int) -> void:
+	if team.is_empty() or total <= 0:
+		return
+	for m in team:
+		add_xp(pi, m, total / team.size())
+	var left := total % team.size()
+	while left > 0:
+		var low: int = team.map(func(m): return m.xp).min()
+		var tied: Array = team.filter(func(m): return m.xp == low)
+		if tied.size() <= left:
+			for m in tied:
+				add_xp(pi, m, 1)
+			left -= tied.size()
+			continue
+		for _k in left:
+			var i: int = await pick(pi, "Leftover quest XP (%d to give): which mercenary gains 1 XP?" % (left - _k), tied.map(mname))
+			add_xp(pi, tied[i], 1)
+			tied.remove_at(i)
+		left = 0
 
 func level_up(pi: int, why: String) -> void:
 	var p = players[pi]
@@ -1359,7 +1381,7 @@ func do_activate(pi: int, m: Dictionary) -> void:
 
 func income(pi: int) -> void:
 	var p = players[pi]
-	gain(pi, "gold", Cards.GUILDS[p.guild].income + (3 if has_keep(pi, "kraken") else 0))
+	gain(pi, "gold", Cards.GUILDS[p.guild].income + (8 if has_keep(pi, "kraken") else 0))
 	for b in p.buildings:
 		var cnt: int = p.buildings[b] - p.today.built.get(b, 0)
 		var bd: Dictionary = Cards.BUILDINGS[b]
@@ -1448,7 +1470,7 @@ func wages(pi: int) -> void:
 func projected_production(pi: int, include_orders: bool) -> Dictionary:
 	var p = players[pi]
 	var out := {"gold": 0, "wood": 0, "stone": 0, "metal": 0}
-	out.gold += Cards.GUILDS[p.guild].income + (3 if has_keep(pi, "kraken") else 0)
+	out.gold += Cards.GUILDS[p.guild].income + (8 if has_keep(pi, "kraken") else 0)
 	for b in p.buildings:
 		var bd: Dictionary = Cards.BUILDINGS[b]
 		var cnt: int = p.buildings[b] - p.today.built.get(b, 0)
@@ -1693,7 +1715,7 @@ func _merc_score(m: Dictionary) -> float:
 func _quest_value(q: String, team: Array) -> float:
 	var d := qdef(q)
 	var r: Dictionary = d.reward
-	var v: float = _value(r) - _VAL.xp * r.get("xp", 0) + _VAL.xp * r.get("xp", 0) * team.size()
+	var v: float = _value(r)
 	v += (4.0 if r.has("item") else 0.0) + (10.0 if r.has("loc") else 0.0) + (5.0 if r.has("keep") else 0.0)
 	return v - _value(d.get("pay", {}))
 

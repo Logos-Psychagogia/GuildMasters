@@ -204,8 +204,8 @@ func _init_format() -> void:
 		["\\bfame\\b", ii("fame")], ["\\bXP\\b", ii("xp")], ["\\b[Dd]efense\\b", ii("defense")],
 		["\\bNight:", ii("night") + " Night:"], ["\\bActivate:", ii("activate") + " Activate:"], ["\\bWork:", ii("work") + " [b]Work:[/b]"],
 		["\\bWhen attacking:", ii("attack") + " When attacking:"], ["\\bOwner:", "[b]Owner:[/b]"],
-		["\\bMight\\b", "[color=#ff8a7a][b]Might[/b][/color]"], ["\\bSkill\\b", "[color=#7fe0a0][b]Skill[/b][/color]"],
-		["\\bIntellect\\b", "[color=#8fb8ff][b]Intellect[/b][/color]"]]
+		["\\bMight\\b", ii("might") + "[color=#ff8a7a][b]Might[/b][/color]"], ["\\bSkill\\b", ii("skill") + "[color=#7fe0a0][b]Skill[/b][/color]"],
+		["\\bIntellect\\b", ii("intellect") + "[color=#8fb8ff][b]Intellect[/b][/color]"]]
 	for p in pairs:
 		var r := RegEx.new()
 		r.compile(p[0])
@@ -246,7 +246,7 @@ func fmt(t: String) -> String:
 func chips(s: Array) -> String:
 	var out := ""
 	for i in 3:
-		out += "[bgcolor=#%s][color=#ffffff][b] %s %d [/b][/color][/bgcolor] " % [STAT_COL[i], "MSI"[i], s[i]]
+		out += "[bgcolor=#%s][color=#ffffff][b] %s %d [/b][/color][/bgcolor] " % [STAT_COL[i], ii(["might", "skill", "intellect"][i], 16), s[i]]
 	return out
 
 func roman(n: int) -> String:

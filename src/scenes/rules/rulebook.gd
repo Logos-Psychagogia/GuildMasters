@@ -274,14 +274,15 @@ func _s6() -> void:
 	_anatomy(_quest(mon), [
 		"[b]Monster[/b] quest, its guild and the rounds it is available.",
 		"Requirements: the team's total [b]Power[/b] and stat needs (here Might). Some quests also need a number of mercenaries.",
-		"Reward: fame, resources, XP for each mercenary sent, and sometimes an item, a location or a bonus you keep."])
+		"Reward: fame, resources, XP shared by the team, and sometimes an item, a location or a bonus you keep."])
 	if con != "" and con != mon:
 		_anatomy(_quest(con), [
 			"[b]Contract[/b] quest: no Power needed.",
 			"The team must meet the stat needs, and you [b]pay[/b] the listed resources when it is completed."])
 	_p("[b]Sending a team:[/b] in the Morning, quests your mercenaries can complete light up. Click one, click mercenaries to add or remove them, and confirm when every requirement is met.")
 	_p("[b]Both players on the same quest:[/b] compare the first requirement, then the next: Power, then each stat need, for monsters; resources in reserve (in the order the quest asks for them), for contracts; stat needs, for contracts with no payment. Still tied: lower fame, then the priority token. The loser may make a retreat offer (see Bids and retreat offers). The losing team returns home and may Work or Activate instead.")
-	_p("[b]Legendary quests[/b] are always available until completed. Each gives 10 fame and a lasting bonus.")
+	_p("[b]Shared XP:[/b] a quest's XP is split evenly among the mercenaries sent. Any leftover goes 1 at a time to the mercenaries with the least XP, to even them out; if fewer points are left than mercenaries tied for least, you choose who gets them. Later quests give more: a quest's XP equals the last round it can appear on (12 if open-ended).")
+	_p("[b]Legendary quests[/b] are always available until completed. Each gives 10 fame, 20 shared XP and a lasting bonus.")
 
 func _s7() -> void:
 	_rows([

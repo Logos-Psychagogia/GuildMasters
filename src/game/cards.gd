@@ -199,43 +199,44 @@ static var ITEMS := {
 
 ## Quests. kind monster|contract. timing [min,max] ([] = legendary, always available).
 ## need: {stat_index: amount}. pay: resources. reward: fame/gold/resources/xp (each)/item/loc/keep.
-## Design change (Nov 25): every quest gives XP to each mercenary sent (at least 1) and regular quests +1 fame.
+## Design change (Nov 25): regular quests +1 fame. Design change (Nov 28): reward xp is the total XP shared by the
+## team (Game.share_xp): the quest's last round (12 if open-ended), 20 for legendary quests.
 static var QUESTS := {
-	"audit": {"name": "Audit the Guild Hall", "guild": "GL", "kind": "contract", "timing": [1, 4], "pay": {}, "need": {2: 4}, "reward": {"xp": 1, "fame": 2, "gold": 2, "item": "golden_scales"}},
-	"firewood": {"name": "Firewood Order", "guild": "GL", "kind": "contract", "timing": [1, 4], "pay": {"wood": 3}, "need": {0: 2}, "reward": {"xp": 1, "fame": 2, "gold": 4, "keep": "night_wood"}},
-	"stone_wall": {"name": "Stone for the Wall", "guild": "GL", "kind": "contract", "timing": [3, 6], "pay": {"stone": 3}, "need": {1: 2}, "reward": {"xp": 1, "fame": 2, "gold": 3, "keep": "night_stone"}},
-	"bridge": {"name": "Bridge Repairs", "guild": "GL", "kind": "contract", "timing": [4, 8], "pay": {"wood": 2, "stone": 2}, "min_mercs": 2, "reward": {"xp": 1, "fame": 3, "gold": 3, "item": "signet_ring"}},
-	"tax": {"name": "Tax Exemption", "guild": "GL", "kind": "contract", "timing": [4, 8], "pay": {"gold": 4}, "need": {2: 4}, "reward": {"xp": 1, "fame": 3, "item": "merchants_seal"}},
-	"loan": {"name": "Royal Loan", "guild": "GL", "kind": "contract", "timing": [5, 7], "pay": {"gold": 6}, "need": {2: 2}, "reward": {"xp": 1, "fame": 4, "item": "golden_idol"}},
-	"cathedral": {"name": "Cathedral Works", "guild": "GL", "kind": "contract", "timing": [6, 99], "pay": {"gold": 2, "stone": 4, "metal": 2}, "need": {0: 3, 1: 3}, "reward": {"xp": 1, "fame": 5, "item": "ward_stone"}},
-	"festival": {"name": "Festival Supplies", "guild": "GL", "kind": "contract", "timing": [6, 9], "pay": {"gold": 3, "wood": 3}, "need": {1: 2, 2: 2}, "reward": {"xp": 1, "fame": 4, "item": "trade_charter"}},
-	"charter": {"name": "Royal Charter", "guild": "GL", "kind": "contract", "timing": [6, 9], "pay": {"gold": 4, "stone": 3}, "need": {1: 3, 2: 3}, "reward": {"xp": 1, "fame": 3, "loc": "royal_mint"}},
-	"wolf_pack": {"name": "Wolf Pack", "guild": "IW", "kind": "monster", "timing": [1, 3], "power": 4, "need": {0: 2}, "reward": {"fame": 2, "gold": 2, "xp": 1, "keep": "night_gold"}},
-	"bandit": {"name": "Bandit Camp", "guild": "IW", "kind": "monster", "timing": [2, 5], "power": 6, "need": {1: 3}, "reward": {"xp": 1, "fame": 2, "gold": 2, "metal": 1, "item": "iron_sword"}},
-	"goblin": {"name": "Goblin Warren", "guild": "IW", "kind": "monster", "timing": [3, 6], "power": 7, "need": {0: 4}, "reward": {"fame": 2, "gold": 3, "xp": 1, "item": "veterans_pact"}},
-	"tournament": {"name": "Mercenary Tournament", "guild": "IW", "kind": "monster", "timing": [3, 6], "power": 7, "need": {0: 5}, "max_mercs": 1, "reward": {"xp": 1, "fame": 3, "gold": 3, "keep": "attack_plus2"}},
-	"troll": {"name": "Troll Bridge", "guild": "IW", "kind": "monster", "timing": [4, 8], "power": 10, "need": {0: 4, 1: 3}, "reward": {"xp": 1, "fame": 3, "gold": 4, "item": "war_shield"}},
-	"ogre": {"name": "Ogre Warband", "guild": "IW", "kind": "monster", "timing": [6, 9], "power": 14, "need": {0: 8}, "reward": {"xp": 1, "fame": 4, "gold": 5, "item": "trophy_rack"}},
-	"blackstone": {"name": "Siege of Blackstone", "guild": "IW", "kind": "monster", "timing": [6, 9], "power": 12, "need": {0: 6}, "min_mercs": 3, "reward": {"xp": 1, "fame": 3, "loc": "siege_workshop"}},
-	"wyvern": {"name": "Wyvern Nest", "guild": "IW", "kind": "monster", "timing": [7, 10], "power": 16, "need": {1: 5}, "reward": {"fame": 4, "gold": 3, "xp": 2, "item": "war_horn"}},
-	"warlord": {"name": "Warlord's Fortress", "guild": "IW", "kind": "monster", "timing": [9, 99], "power": 20, "need": {0: 10}, "reward": {"xp": 1, "fame": 6, "gold": 5, "item": "war_banner"}},
-	"caravan": {"name": "Lost Caravan", "guild": "", "kind": "monster", "timing": [1, 3], "power": 4, "need": {1: 2}, "reward": {"xp": 1, "fame": 2, "gold": 2, "wood": 1, "stone": 1, "item": "backpack"}},
-	"pilgrims": {"name": "Escort the Pilgrims", "guild": "", "kind": "monster", "timing": [2, 5], "power": 5, "min_mercs": 2, "reward": {"xp": 1, "fame": 2, "gold": 3, "item": "travelers_boots"}},
-	"saint": {"name": "Shrine of the Saint", "guild": "", "kind": "contract", "timing": [3, 6], "pay": {"gold": 3}, "max_mercs": 1, "reward": {"xp": 1, "fame": 2, "keep": "wages_minus1"}},
-	"smith": {"name": "Smith's Commission", "guild": "", "kind": "contract", "timing": [3, 6], "pay": {"metal": 2}, "need": {1: 3}, "reward": {"xp": 1, "fame": 2, "item": "masons_tools", "keep": "night_metal"}},
-	"spider": {"name": "Giant Spider", "guild": "", "kind": "monster", "timing": [4, 8], "power": 8, "need": {0: 2, 1: 2}, "reward": {"fame": 2, "xp": 1, "item": "wooden_mace"}},
-	"masterwork": {"name": "Masterwork Commission", "guild": "", "kind": "contract", "timing": [5, 7], "pay": {"wood": 2, "metal": 3}, "need": {1: 4}, "reward": {"xp": 1, "fame": 3, "keep": "level_up"}},
-	"crypt": {"name": "Haunted Crypt", "guild": "", "kind": "monster", "timing": [6, 9], "power": 12, "need": {2: 3}, "min_mercs": 2, "reward": {"xp": 1, "fame": 4, "item": "ancient_map"}},
-	"armory": {"name": "Royal Armory", "guild": "", "kind": "contract", "timing": [7, 10], "pay": {"metal": 4}, "need": {0: 3}, "reward": {"xp": 1, "fame": 5, "gold": 2, "keep": "garrison_plus2"}},
-	"library": {"name": "The Lost Library", "guild": "", "kind": "contract", "timing": [8, 99], "pay": {}, "need": {2: 6}, "reward": {"fame": 4, "xp": 2, "item": "scholars_tome"}},
-	"legend": {"name": "The Lost Legend", "guild": "", "kind": "monster", "timing": [9, 99], "power": 20, "need": {2: 5}, "reward": {"xp": 1, "fame": 5, "loc": "hall_of_legends"}},
+	"audit": {"name": "Audit the Guild Hall", "guild": "GL", "kind": "contract", "timing": [1, 4], "pay": {}, "need": {2: 4}, "reward": {"xp": 4, "fame": 2, "gold": 2, "item": "golden_scales"}},
+	"firewood": {"name": "Firewood Order", "guild": "GL", "kind": "contract", "timing": [1, 4], "pay": {"wood": 3}, "need": {0: 2}, "reward": {"xp": 4, "fame": 2, "gold": 4, "keep": "night_wood"}},
+	"stone_wall": {"name": "Stone for the Wall", "guild": "GL", "kind": "contract", "timing": [3, 6], "pay": {"stone": 3}, "need": {1: 2}, "reward": {"xp": 6, "fame": 2, "gold": 3, "keep": "night_stone"}},
+	"bridge": {"name": "Bridge Repairs", "guild": "GL", "kind": "contract", "timing": [4, 8], "pay": {"wood": 2, "stone": 2}, "min_mercs": 2, "reward": {"xp": 8, "fame": 3, "gold": 3, "item": "signet_ring"}},
+	"tax": {"name": "Tax Exemption", "guild": "GL", "kind": "contract", "timing": [4, 8], "pay": {"gold": 4}, "need": {2: 4}, "reward": {"xp": 8, "fame": 3, "item": "merchants_seal"}},
+	"loan": {"name": "Royal Loan", "guild": "GL", "kind": "contract", "timing": [5, 7], "pay": {"gold": 6}, "need": {2: 2}, "reward": {"xp": 7, "fame": 4, "item": "golden_idol"}},
+	"cathedral": {"name": "Cathedral Works", "guild": "GL", "kind": "contract", "timing": [6, 99], "pay": {"gold": 2, "stone": 4, "metal": 2}, "need": {0: 3, 1: 3}, "reward": {"xp": 12, "fame": 5, "item": "ward_stone"}},
+	"festival": {"name": "Festival Supplies", "guild": "GL", "kind": "contract", "timing": [6, 9], "pay": {"gold": 3, "wood": 3}, "need": {1: 2, 2: 2}, "reward": {"xp": 9, "fame": 4, "item": "trade_charter"}},
+	"charter": {"name": "Royal Charter", "guild": "GL", "kind": "contract", "timing": [6, 9], "pay": {"gold": 4, "stone": 3}, "need": {1: 3, 2: 3}, "reward": {"xp": 9, "fame": 3, "loc": "royal_mint"}},
+	"wolf_pack": {"name": "Wolf Pack", "guild": "IW", "kind": "monster", "timing": [1, 3], "power": 4, "need": {0: 2}, "reward": {"fame": 2, "gold": 2, "xp": 3, "keep": "night_gold"}},
+	"bandit": {"name": "Bandit Camp", "guild": "IW", "kind": "monster", "timing": [2, 5], "power": 6, "need": {1: 3}, "reward": {"xp": 5, "fame": 2, "gold": 2, "metal": 1, "item": "iron_sword"}},
+	"goblin": {"name": "Goblin Warren", "guild": "IW", "kind": "monster", "timing": [3, 6], "power": 7, "need": {0: 4}, "reward": {"fame": 2, "gold": 3, "xp": 6, "item": "veterans_pact"}},
+	"tournament": {"name": "Mercenary Tournament", "guild": "IW", "kind": "monster", "timing": [3, 6], "power": 7, "need": {0: 5}, "max_mercs": 1, "reward": {"xp": 6, "fame": 3, "gold": 3, "keep": "attack_plus2"}},
+	"troll": {"name": "Troll Bridge", "guild": "IW", "kind": "monster", "timing": [4, 8], "power": 10, "need": {0: 4, 1: 3}, "reward": {"xp": 8, "fame": 3, "gold": 4, "item": "war_shield"}},
+	"ogre": {"name": "Ogre Warband", "guild": "IW", "kind": "monster", "timing": [6, 9], "power": 14, "need": {0: 8}, "reward": {"xp": 9, "fame": 4, "gold": 5, "item": "trophy_rack"}},
+	"blackstone": {"name": "Siege of Blackstone", "guild": "IW", "kind": "monster", "timing": [6, 9], "power": 12, "need": {0: 6}, "min_mercs": 3, "reward": {"xp": 9, "fame": 3, "loc": "siege_workshop"}},
+	"wyvern": {"name": "Wyvern Nest", "guild": "IW", "kind": "monster", "timing": [7, 10], "power": 16, "need": {1: 5}, "reward": {"fame": 4, "gold": 3, "xp": 10, "item": "war_horn"}},
+	"warlord": {"name": "Warlord's Fortress", "guild": "IW", "kind": "monster", "timing": [9, 99], "power": 20, "need": {0: 10}, "reward": {"xp": 12, "fame": 6, "gold": 5, "item": "war_banner"}},
+	"caravan": {"name": "Lost Caravan", "guild": "", "kind": "monster", "timing": [1, 3], "power": 4, "need": {1: 2}, "reward": {"xp": 3, "fame": 2, "gold": 2, "wood": 1, "stone": 1, "item": "backpack"}},
+	"pilgrims": {"name": "Escort the Pilgrims", "guild": "", "kind": "monster", "timing": [2, 5], "power": 5, "min_mercs": 2, "reward": {"xp": 5, "fame": 2, "gold": 3, "item": "travelers_boots"}},
+	"saint": {"name": "Shrine of the Saint", "guild": "", "kind": "contract", "timing": [3, 6], "pay": {"gold": 3}, "max_mercs": 1, "reward": {"xp": 6, "fame": 2, "keep": "wages_minus1"}},
+	"smith": {"name": "Smith's Commission", "guild": "", "kind": "contract", "timing": [3, 6], "pay": {"metal": 2}, "need": {1: 3}, "reward": {"xp": 6, "fame": 2, "item": "masons_tools", "keep": "night_metal"}},
+	"spider": {"name": "Giant Spider", "guild": "", "kind": "monster", "timing": [4, 8], "power": 8, "need": {0: 2, 1: 2}, "reward": {"fame": 2, "xp": 8, "item": "wooden_mace"}},
+	"masterwork": {"name": "Masterwork Commission", "guild": "", "kind": "contract", "timing": [5, 7], "pay": {"wood": 2, "metal": 3}, "need": {1: 4}, "reward": {"xp": 7, "fame": 3, "keep": "level_up"}},
+	"crypt": {"name": "Haunted Crypt", "guild": "", "kind": "monster", "timing": [6, 9], "power": 12, "need": {2: 3}, "min_mercs": 2, "reward": {"xp": 9, "fame": 4, "item": "ancient_map"}},
+	"armory": {"name": "Royal Armory", "guild": "", "kind": "contract", "timing": [7, 10], "pay": {"metal": 4}, "need": {0: 3}, "reward": {"xp": 10, "fame": 5, "gold": 2, "keep": "garrison_plus2"}},
+	"library": {"name": "The Lost Library", "guild": "", "kind": "contract", "timing": [8, 99], "pay": {}, "need": {2: 6}, "reward": {"fame": 4, "xp": 12, "item": "scholars_tome"}},
+	"legend": {"name": "The Lost Legend", "guild": "", "kind": "monster", "timing": [9, 99], "power": 20, "need": {2: 5}, "reward": {"xp": 12, "fame": 5, "loc": "hall_of_legends"}},
 }
 
 static var LEGENDS := {
-	"citadel": {"name": "The King's Citadel", "guild": "GL", "kind": "contract", "pay": {"gold": 30, "wood": 20, "stone": 10, "metal": 5}, "reward": {"xp": 1, "fame": 10, "keep": "citadel"}},
-	"dragon": {"name": "The Red Dragon", "guild": "IW", "kind": "monster", "power": 20, "need": {0: 10}, "reward": {"xp": 1, "fame": 10, "keep": "dragon"}},
-	"kraken": {"name": "The Kraken of the Bay", "guild": "", "kind": "monster", "power": 30, "min_mercs": 8, "reward": {"xp": 1, "fame": 10, "keep": "kraken"}},
-	"lich": {"name": "The Lich of Greyhollow", "guild": "", "kind": "monster", "power": 20, "need": {2: 10}, "reward": {"xp": 1, "fame": 10, "keep": "lich"}},
+	"citadel": {"name": "The King's Citadel", "guild": "GL", "kind": "contract", "pay": {"gold": 30, "wood": 20, "stone": 10, "metal": 5}, "reward": {"xp": 20, "fame": 10, "keep": "citadel"}},
+	"dragon": {"name": "The Red Dragon", "guild": "IW", "kind": "monster", "power": 20, "need": {0: 10}, "reward": {"xp": 20, "fame": 10, "keep": "dragon"}},
+	"kraken": {"name": "The Kraken of the Bay", "guild": "", "kind": "monster", "power": 30, "min_mercs": 8, "reward": {"xp": 20, "fame": 10, "keep": "kraken"}},
+	"lich": {"name": "The Lich of Greyhollow", "guild": "", "kind": "monster", "power": 20, "need": {2: 10}, "reward": {"xp": 20, "fame": 10, "keep": "lich"}},
 }
 
 static var KEEP_TEXT := {
@@ -243,7 +244,7 @@ static var KEEP_TEXT := {
 	"wages_minus1": "Your total wages -1 gold each Night", "attack_plus2": "Your attacks: +2 Power",
 	"garrison_plus2": "Your garrison: +2 Power", "level_up": "One mercenary gains a level (once)",
 	"citadel": "The Citadel: your locations get +3 defense", "dragon": "Dragonslayers: your mercenaries get +1 Might",
-	"kraken": "Sunken treasure: +3 base gold production", "lich": "Phylactery: your mercenaries gain 1 extra XP each Night",
+	"kraken": "Sunken treasure: +8 base gold production", "lich": "Phylactery: Night: all your mercenaries gain 1 XP",
 }
 
 static var BUILDINGS := {

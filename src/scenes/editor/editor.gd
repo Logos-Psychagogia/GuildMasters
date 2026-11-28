@@ -30,7 +30,7 @@ const LABELS := {
 	"owner": "Owner bonus", "kind": "Kind", "value": "Value", "power": "Power", "need": "Stat needs (0 M, 1 S, 2 I)",
 	"pay": "Pays", "reward": "Reward", "cost": "Cost", "prod": "Produces", "def": "Defense",
 	"loc_def": "Location defense by level", "restock_walls": "Walls on restocked locations, in order",
-	"fame_spaces": "Fame track spaces", "item": "Item (id)", "loc": "Location (id)", "base": "Base production (when worked)", "min_mercs": "At least N mercenaries", "max_mercs": "At most N mercenaries (0 = no limit)", "loc_discount": "Location bid discount", "keep": "Kept bonus (id)", "xp": "XP each",
+	"fame_spaces": "Fame track spaces", "item": "Item (id)", "loc": "Location (id)", "base": "Base production (when worked)", "min_mercs": "At least N mercenaries", "max_mercs": "At most N mercenaries (0 = no limit)", "loc_discount": "Location bid discount", "keep": "Kept bonus (id)", "xp": "XP shared by the team",
 	"k": "Kind", "div": "Divide by", "res": "Resource", "stat": "Stat (0 M, 1 S, 2 I, 3 highest)", "mult": "Multiplier",
 	"plus": "Plus", "min": "Minimum", "scope": "Scope",
 }

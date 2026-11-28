@@ -116,6 +116,13 @@ func _rules_checks() -> int:
 	f += _check(g3.projected_production(0, false)[Cards.BUILDINGS[bid].prod] >= 1, "the building produces from the next night")
 	for q in Cards.QUESTS:
 		f += _check(Cards.QUESTS[q].reward.get("xp", 0) >= 1, "quest %s gives XP" % q)
+	var team := [g3.new_merc("kael", 0), g3.new_merc("varn", 2), g3.new_merc("mira", 2)]
+	g3.share_xp(0, team, 10)   # 3 each -> 3, 5, 5; the leftover 1 goes to the lowest
+	f += _check(team.map(func(x): return x.xp) == [4, 5, 5], "10 XP shared by 0/2/2 gives 4/5/5, got %s" % [team.map(func(x): return x.xp)])
+	g3.share_xp(0, team, 4)    # 1 each -> 5, 6, 6; leftover 1 -> 6, 6, 6
+	f += _check(team.map(func(x): return x.xp) == [6, 6, 6], "4 more XP evens them at 6, got %s" % [team.map(func(x): return x.xp)])
+	g3.share_xp(0, team, 2)    # 3 tied, 2 left: the player (bot) picks two
+	f += _check(team.map(func(x): return x.xp).reduce(func(a, b): return a + b) == 20 and team.map(func(x): return x.xp).max() == 7, "2 XP among 3 tied go to two of them, got %s" % [team.map(func(x): return x.xp)])
 	var g4 := Game.new()
 	g4.setup(["A", "B"], [true, true], 4)
 	var w4 := g4.new_merc("kael", 0)   # Might 1: Arena pays only its base 2 gold

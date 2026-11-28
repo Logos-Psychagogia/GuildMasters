@@ -12,7 +12,9 @@ These replace the rulebook and the printed cards in this build:
 - **Night order:** XP and moving equipment, then Build, then Production as the last thing in the day, then Wages, then Reset.
 - **Unpaid wages:** if you can't pay every wage after production, you choose which mercenaries to pay and keep. The others leave the game, and you lose 1 fame per level of each one.
 - **No XP at Night.** Mercenaries (hired or in the row) no longer gain 1 XP each Night.
-- **Quests give XP and more fame.** Every quest gives at least 1 XP to each mercenary sent (some give 2), and every regular quest gives 1 more fame than printed. Legendary quests stay at 10 fame and also give 1 XP each.
+- **Quests give XP and more fame.** Every regular quest gives 1 more fame than printed. Legendary quests stay at 10 fame.
+- **Shared quest XP (Nov 28).** A quest's XP is a total for the team, not per mercenary: the last round the quest can appear on (12 if open-ended, so 3 to 12), and 20 for legendary quests. It is split evenly (rounded down); the leftover goes 1 at a time to the team's lowest-XP mercenaries, and when fewer points are left than mercenaries tied for lowest, the player picks who gets them.
+- **Kraken and Lich keeps (Nov 28).** Sunken treasure is +8 base gold production (was +3). Phylactery reads "Night: all your mercenaries gain 1 XP".
 - **Locations cost much more.** Minimum bid = printed bid x2 + 4 (10 for Arena, Lumber Camp, Quarry, Tavern; 12 for Market Square, Trading Post, Barracks, Mess Hall, Training Grounds, Caravanserai, Iron Mine; 14 for Counting House, Old Shrine, Forge; 16 for Bank), plus 2 for a Wooden Wall, 4 for a Stone Wall, 6 for an Iron Wall on the location. Late locations therefore cost 16 to 22.
 - **Golden Ledger:** its power is now "your minimum bid for locations is 3 gold lower" (it no longer gains 1 gold per owner bonus).
 - **Counting Office (Golden Ledger building):** each owner bonus at a location you own gives +1 gold, per Counting Office you have. It replaces "+1 gold, or +2 if a rival worked at your location".
