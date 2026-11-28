@@ -1423,10 +1423,10 @@ func income(pi: int) -> void:
 		fire(pi, m, "night")
 	if has_relic(pi, "trade_charter"):
 		var have: Array = ["wood", "stone", "metal"].filter(func(r): return p[r] > 0)
-		var i: int = await pick(pi, "Trade Charter: sell a resource for 4 gold?", have.map(func(r): return "Sell 1 " + r), "Don't sell")
+		var i: int = await pick(pi, "Trade Charter: sell a resource for 3 gold?", have.map(func(r): return "Sell 1 " + r), "Don't sell")
 		if i >= 0:
 			p[have[i]] -= 1
-			gain(pi, "gold", 4)
+			gain(pi, "gold", 3)
 
 func wage_of(pi: int, m: Dictionary) -> int:
 	return level(m) - (1 if level(m) >= 2 and has_relic(pi, "veterans_pact") else 0)
