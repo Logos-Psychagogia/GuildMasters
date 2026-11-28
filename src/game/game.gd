@@ -1417,6 +1417,8 @@ func income(pi: int) -> void:
 			gain(pi, keep_prod[k], 1)
 	if has_relic(pi, "golden_idol"):
 		gain(pi, "gold", 2)
+	if has_relic(pi, "venom_lore"):
+		await share_xp(pi, p.mercs, 1)
 	for m in garrison(pi):   # only defending mercenaries use their Night ability
 		fire(pi, m, "night")
 	if has_relic(pi, "trade_charter"):
