@@ -12,7 +12,7 @@ static var GUILDS := {
 	"GL": {"name": "Golden Ledger", "start": 8, "income": 4, "loc_discount": 3,
 		"text": "Your minimum bid for locations is 3 gold lower."},
 	"IW": {"name": "Iron Wolves", "start": 6, "income": 3,
-		"text": "Your attacking mercenaries have +1 Might each. When you conquer a location: gain 2 gold."},
+		"text": "Your attacking mercenaries have +1 Might each. When you conquer a location: gain 3 gold."},
 }
 
 static var MERCS := {
@@ -192,7 +192,7 @@ static var ITEMS := {
 	"trade_charter": {"name": "Trade Charter", "kind": "relic", "value": 4, "text": "Night: you may sell a resource to gain 4 gold."},
 	"ward_stone": {"name": "Ward Stone", "kind": "relic", "value": 4, "text": "Locations you own have +2 defense."},
 	"trophy_rack": {"name": "Trophy Rack", "kind": "relic", "value": 4, "text": "Conquest: +1 fame."},
-	"veterans_pact": {"name": "Veteran's Pact", "kind": "relic", "value": 4, "text": "Night: your level 3 mercenaries' wages -1 gold each."},
+	"veterans_pact": {"name": "Veteran's Pact", "kind": "relic", "value": 4, "text": "Your level 2 and 3 mercenaries' wages are reduced by 1 gold."},
 	"war_horn": {"name": "War Horn", "kind": "relic", "value": 3, "text": "Noon: +3 Might to one mercenary you own until the end of Night."},
 	"ancient_map": {"name": "Ancient Map", "kind": "relic", "value": 3, "text": "Dawn: look at the top 3 quests, discard any of them and put the rest back in any order."},
 }

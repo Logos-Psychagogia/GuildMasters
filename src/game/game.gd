@@ -942,7 +942,8 @@ func on_conquer(pi: int, group: Array) -> void:
 	var p = players[pi]
 	p.today.conquered = true
 	if p.guild == "IW":
-		gain(pi, "gold", 2)
+		gain(pi, "gold", 3)
+		note("Iron Wolves conquest bonus: %s gains 3 gold." % p.name)
 	for m in group:
 		fire(pi, m, "conquest", group)
 	if has_relic(pi, "trophy_rack"):
@@ -1426,9 +1427,9 @@ func income(pi: int) -> void:
 			gain(pi, "gold", 4)
 
 func wage_of(pi: int, m: Dictionary) -> int:
-	return level(m) - (1 if level(m) == 3 and has_relic(pi, "veterans_pact") else 0)
+	return level(m) - (1 if level(m) >= 2 and has_relic(pi, "veterans_pact") else 0)
 
-## Wages: 1 gold per level (Veteran's Pact -1 on level III). Discounts (Mess Hall, Shrine of the Saint)
+## Wages: 1 gold per level (Veteran's Pact -1 on levels II and III). Discounts (Mess Hall, Shrine of the Saint)
 ## come off the total. If you can't pay everyone, you choose who to keep; the rest leave the game
 ## and you lose 1 fame per level of each one.
 func wages_due(pi: int) -> int:

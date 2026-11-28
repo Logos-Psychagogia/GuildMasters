@@ -130,6 +130,15 @@ func _rules_checks() -> int:
 	var base5: int = gn.projected_production(0, false).gold
 	iso.order = {"t": "defend"}
 	f += _check(gn.projected_production(0, false).gold == base5 + 2, "Isolde's Night gold needs Defend")
+	var gw := Game.new()
+	gw.setup(["A", "B"], [true, true], 6)
+	gw.players[0].guild = "IW"
+	var gold_w: int = gw.players[0].gold
+	gw.on_conquer(0, [])
+	f += _check(gw.players[0].gold == gold_w + 3, "Iron Wolves gain 3 gold on conquest")
+	var vet := gw.new_merc("kael", 3)   # level II
+	gw.players[0].relics.append("veterans_pact")
+	f += _check(gw.wage_of(0, vet) == 1, "Veteran's Pact cuts a level II wage to 1")
 	var g4 := Game.new()
 	g4.setup(["A", "B"], [true, true], 4)
 	var w4 := g4.new_merc("kael", 0)   # Might 1: Arena pays only its base 2 gold
